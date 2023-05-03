@@ -5,47 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\AuthenticationException;
+use App\Http\Requests\LoginRequest;
+use App\Resources\UserResource;
+use Auth;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        if (! $request->email) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'email is required',
-            ]);
-        }
-
-        if (strlen($request->email) < 6) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'email is invalid',
-            ]);
-        }
-
-        if (! $request->password) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'password is required',
-            ]);
-        }
-        if (strlen($request->password) < 8) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'password is invalid',
-            ]);
-        }
-
-        $user = User::where('email', $request->email)->first();
-        if (! $user) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Model not found.',
-            ]);
-        }
-
-        if (! Hash::check($request->password, $user->password)) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'status' => 404,
                 'message' => 'Invalid credentials',
@@ -53,8 +22,8 @@ class LoginController extends Controller
         }
 
         return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('User-Token')->plainTextToken,
+            'user' => UserResource::make(Auth::user()),
+            'token' => Auth::user()->createToken('User-Token')->plainTextToken,
         ]);
     }
 }
