@@ -2,7 +2,10 @@
 
 namespace App\Services\InternetServiceProvider;
 
-class Ooredoo extends Mpt
+use App\Interfaces\InternetServiceProviderInterface;
+use App\Abstracts\InternetServiceProviderAbstract;
+
+class Ooredoo extends InternetServiceProviderAbstract implements InternetServiceProviderInterface
 {
     protected $operator = 'ooredoo';
 
@@ -15,7 +18,7 @@ class Ooredoo extends Mpt
         $this->month = $month;
     }
 
-    public function calculateTotalAmount()
+    public function calculateTotalAmount(): float
     {
         return $this->month * $this->monthlyFees;
     }
